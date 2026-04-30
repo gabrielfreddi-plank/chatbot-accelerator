@@ -1,0 +1,20 @@
+[
+  {
+    "id": "eiuwfs9y7ml",
+    "content": "The user's favorite color is blue.",
+    "tags": [
+      "preference",
+      "favorite color"
+    ],
+    "createdAt": "2026-04-29T20:09:19.370Z"
+  },
+  {
+    "id": "ds3w6r8l1p",
+    "content": "User's favorite color is Red.",
+    "tags": [
+      "preference",
+      "favorite color"
+    ],
+    "createdAt": "2026-04-29T20:11:10.718Z"
+  }
+]

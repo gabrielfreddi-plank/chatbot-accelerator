@@ -1,0 +1,148 @@
+'use client'
+
+import { KeyboardEvent, useRef, useState } from 'react'
+import { Send, Square } from 'lucide-react'
+import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { parseCommand, isValidModel, isValidEngine } from '@/lib/commands'
+import type { ChatModel, SearchEngine } from '@/lib/types'
+import { MODEL_LABELS } from '@/lib/cost'
+import { ENGINE_LABELS } from '@/lib/search-engines'
+
+interface Props {
+  isStreaming: boolean
+  onSend: (text: string) => void
+  onStop: () => void
+  onModelChange: (model: ChatModel) => void
+  onEngineChange: (engine: SearchEngine) => void
+  onSystemChange: (prompt: string) => void
+  onShowCost: () => void
+  onResearch: (topic: string) => void
+}
+
+export function ChatInput({
+  isStreaming,
+  onSend,
+  onStop,
+  onModelChange,
+  onEngineChange,
+  onSystemChange,
+  onShowCost,
+  onResearch,
+}: Props) {
+  const [value, setValue] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  function handleSubmit() {
+    const trimmed = value.trim()
+    if (!trimmed || isStreaming) return
+
+    const cmd = parseCommand(trimmed)
+    if (cmd) {
+      setValue('')
+      switch (cmd.type) {
+        case 'cost':
+          onShowCost()
+          return
+        case 'model':
+          if (!cmd.name) {
+            toast.error('Usage: /model <opus|sonnet|haiku>')
+            return
+          }
+          if (!isValidModel(cmd.name)) {
+            toast.error(`Unknown model "${cmd.name}". Choose: opus, sonnet, haiku`)
+            return
+          }
+          onModelChange(cmd.name)
+          toast.success(`Switched to ${MODEL_LABELS[cmd.name]}`)
+          return
+        case 'engine':
+          if (!cmd.name) {
+            toast.error('Usage: /engine <none|brave|tavily>')
+            return
+          }
+          if (!isValidEngine(cmd.name)) {
+            toast.error(`Unknown engine "${cmd.name}". Choose: none, brave, tavily`)
+            return
+          }
+          onEngineChange(cmd.name)
+          toast.success(`Search engine: ${ENGINE_LABELS[cmd.name]}`)
+          return
+        case 'fetchpage':
+          if (!cmd.url) {
+            toast.error('Usage: /fetchpage <url>')
+            return
+          }
+          onSend(`Read the content at: ${cmd.url}`)
+          return
+        case 'system':
+          if (!cmd.prompt) {
+            toast.error('Usage: /system <your prompt>')
+            return
+          }
+          onSystemChange(cmd.prompt)
+          toast.success('System prompt updated')
+          return
+        case 'research':
+          if (!cmd.topic) {
+            toast.error('Usage: /research <topic>')
+            return
+          }
+          onResearch(cmd.topic)
+          return
+        case 'unknown':
+          toast.error(`Unknown command: ${cmd.raw}`)
+          return
+      }
+    }
+
+    onSend(trimmed)
+    setValue('')
+  }
+
+  function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSubmit()
+    }
+  }
+
+  return (
+    <div className="border-t border-border/40 bg-background/90 backdrop-blur-sm shrink-0">
+      <div className="max-w-3xl mx-auto px-4 py-3 flex items-end gap-2.5">
+        <Textarea
+          ref={textareaRef}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Message… or /cost, /model, /engine, /fetchpage, /system, /research"
+          className="min-h-[44px] max-h-40 resize-none flex-1 bg-muted/40 border-border/50 focus-visible:ring-indigo-500/30 focus-visible:border-indigo-500/40 placeholder:text-muted-foreground/50 text-sm"
+          rows={1}
+          disabled={isStreaming}
+        />
+        {isStreaming ? (
+          <Button
+            size="icon"
+            variant="destructive"
+            onClick={onStop}
+            title="Stop"
+            className="shrink-0"
+          >
+            <Square className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button
+            size="icon"
+            onClick={handleSubmit}
+            disabled={!value.trim()}
+            title="Send"
+            className="shrink-0 bg-indigo-600 hover:bg-indigo-500 text-white border-0"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+    </div>
+  )
+}
