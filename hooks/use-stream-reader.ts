@@ -14,6 +14,16 @@ export type StreamEvent =
   | { type: 'research_search'; query: string }
   | { type: 'research_fetch'; url: string }
   | { type: 'tool_result'; result: string; kind: string }
+  | { type: 'ui_loading' }
+  | { type: 'ui_skeleton'; spec: import('@/lib/types').UiSpec }
+  | {
+      type: 'ui_fill'
+      id: string
+      props: Record<string, unknown>
+      on?: Record<string, { action: string; params?: Record<string, unknown> }>
+      visible?: { $state: string; eq: unknown }
+    }
+  | { type: 'ui_render'; spec: import('@/lib/types').UiSpec }
   | { type: 'done' }
   | { type: 'error'; message: string }
 

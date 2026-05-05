@@ -54,7 +54,9 @@ export function useChat(config: ChatConfig = {}) {
 
   const abortRef = useRef<AbortController | null>(null)
   const onSyncRef = useRef(onSync)
-  onSyncRef.current = onSync
+  useEffect(() => {
+    onSyncRef.current = onSync
+  }, [onSync])
 
   // Sync to conversation store after streaming ends
   const prevStreamingRef = useRef(false)
@@ -68,9 +70,13 @@ export function useChat(config: ChatConfig = {}) {
 
   // Sync when settings change (outside of streaming)
   const messagesRef = useRef(messages)
-  messagesRef.current = messages
   const usageRef = useRef(usage)
-  usageRef.current = usage
+  useEffect(() => {
+    messagesRef.current = messages
+  }, [messages])
+  useEffect(() => {
+    usageRef.current = usage
+  }, [usage])
   useEffect(() => {
     if (!isStreaming) {
       onSyncRef.current?.({
@@ -120,10 +126,13 @@ export function useChat(config: ChatConfig = {}) {
       }
 
       function flushPending() {
-        if (pendingToolIds.length === 0) return
         const ids = pendingToolIds.splice(0)
+        if (ids.length === 0) return
         setMessages((prev) =>
-          prev.map((m) => (ids.includes(m.id) ? { ...m, toolStatus: 'done' as const } : m)),
+          prev.map((m) => {
+            if (ids.includes(m.id)) return { ...m, toolStatus: 'done' as const }
+            return m
+          }),
         )
       }
 

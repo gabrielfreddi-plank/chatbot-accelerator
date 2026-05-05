@@ -27,7 +27,6 @@ export function SystemPromptDialog({ value, onChange }: Props) {
     if (o) setDraft(value)
     setOpen(o)
   }
-
   function handleSave() {
     onChange(draft.trim())
     setOpen(false)
