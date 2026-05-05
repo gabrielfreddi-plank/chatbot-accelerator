@@ -191,6 +191,12 @@ export function useChat(config: ChatConfig = {}) {
             insertToolStatus('Saving note', preview)
           } else if (event.type === 'tool_read_notes') {
             insertToolStatus('Reading notes', event.filter || 'All notes')
+          } else if (event.type === 'tool_save_memory') {
+            const preview =
+              event.content.length > 60 ? event.content.slice(0, 60) + '…' : event.content
+            insertToolStatus('Saving memory', preview)
+          } else if (event.type === 'tool_search_memories') {
+            insertToolStatus('Searching memories', event.query)
           } else if (event.type === 'usage') {
             setUsage((prev) => {
               const modelKey = (event.model as ChatModel | undefined) ?? currentModel

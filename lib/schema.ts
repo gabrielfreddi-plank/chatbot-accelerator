@@ -1,4 +1,4 @@
-import { pgTable, text, real, timestamp, jsonb } from 'drizzle-orm/pg-core'
+import { pgTable, text, real, timestamp, jsonb, vector } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
@@ -31,7 +31,6 @@ export const messages = pgTable('messages', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 
-// Phase 6: pgvector embedding column added via migration when needed
 export const memories = pgTable('memories', {
   id: text('id').primaryKey(),
   userId: text('user_id')
@@ -39,6 +38,8 @@ export const memories = pgTable('memories', {
     .references(() => users.id, { onDelete: 'cascade' }),
   content: text('content').notNull(),
   category: text('category').notNull().default('fact'),
+  // 1536 dims = text-embedding-3-small; requires pgvector extension
+  embedding: vector('embedding', { dimensions: 1536 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').notNull(),
 })

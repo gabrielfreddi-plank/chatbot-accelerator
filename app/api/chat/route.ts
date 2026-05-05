@@ -6,6 +6,14 @@ import { readUrlTool, executeReadUrl } from '@/lib/fetch-page'
 import { calculatorTool, executeCalculate } from '@/lib/calculator'
 import { saveNoteTool, readNotesTool, executeSaveNote, executeReadNotes } from '@/lib/note-store'
 import {
+  saveUserMemoryTool,
+  searchMemoriesTool,
+  saveUserMemory,
+  searchMemories,
+  getRecentMemories,
+  MEMORY_SYSTEM_PROMPT_ADDENDUM,
+} from '@/lib/user-memory'
+import {
   renderUiSkeletonTool,
   fillComponentTool,
   validateSkeleton,
@@ -43,14 +51,14 @@ function backoff(attempt: number): number {
 
 export async function POST(request: Request) {
   const userId = request.headers.get('X-User-ID') ?? ''
-  void userId // will be used for DB persistence in a later phase
   const body: ApiChatRequest = await request.json()
   const { messages, model, temperature, systemPrompt, searchEngine, enableUiTool } = body
 
   const encoder = new TextEncoder()
   const searchTools = searchEngine && searchEngine !== 'none' ? [webSearchTool] : []
   const uiTools = enableUiTool ? [renderUiSkeletonTool, fillComponentTool] : []
-  const tools = [...searchTools, readUrlTool, calculatorTool, saveNoteTool, readNotesTool, ...uiTools]
+  const memoryTools = userId ? [saveUserMemoryTool, searchMemoriesTool] : []
+  const tools = [...searchTools, readUrlTool, calculatorTool, saveNoteTool, readNotesTool, ...memoryTools, ...uiTools]
 
   // Run the model loop in a detached IIFE so `start` returns immediately and
   // Next.js flushes response headers + each enqueued chunk to the wire as soon
@@ -69,6 +77,13 @@ export async function POST(request: Request) {
       }
 
       void (async () => {
+        // Inject top-5 recent memories into the system prompt
+        const recentMemories = userId ? await getRecentMemories(userId) : []
+        const memoriesBlock =
+          recentMemories.length > 0
+            ? `\n\nUser memories:\n${recentMemories.map((m) => `- [${m.category}] ${m.content}`).join('\n')}`
+            : ''
+
         const managedMessages = await manageContext(
           messages.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
           client,
@@ -164,6 +179,21 @@ export async function POST(request: Request) {
             }
             return `Filled "${validation.data.id}". Remaining: ${remaining.join(', ')}. Continue with the next fill_component.`
           }
+          if (tu.name === 'save_user_memory') {
+            const content = (input.content as string) ?? ''
+            const category = (input.category as string) ?? 'fact'
+            send({ type: 'tool_save_memory', content, category })
+            const r = await saveUserMemory(userId, content, category as 'preference' | 'fact' | 'goal' | 'context')
+            send({ type: 'tool_result', result: r, kind: 'save_memory' })
+            return r
+          }
+          if (tu.name === 'search_memories') {
+            const query = (input.query as string) ?? ''
+            send({ type: 'tool_search_memories', query })
+            const r = await searchMemories(userId, query)
+            send({ type: 'tool_result', result: r.slice(0, 1000), kind: 'search_memories' })
+            return r
+          }
           return `Unknown tool: ${tu.name}`
         }
 
@@ -180,9 +210,13 @@ export async function POST(request: Request) {
                   model,
                   max_tokens: 8192,
                   temperature,
-                  system: enableUiTool
-                    ? (systemPrompt ? `${systemPrompt}\n${UI_SYSTEM_PROMPT_ADDENDUM}` : UI_SYSTEM_PROMPT_ADDENDUM)
-                    : (systemPrompt || undefined),
+                  system: (() => {
+                    const base = systemPrompt || ''
+                    const uiBlock = enableUiTool ? `\n${UI_SYSTEM_PROMPT_ADDENDUM}` : ''
+                    const memoryBlock = memoriesBlock + (userId ? `\n${MEMORY_SYSTEM_PROMPT_ADDENDUM}` : '')
+                    const full = (base + uiBlock + memoryBlock).trim()
+                    return full || undefined
+                  })(),
                   messages: currentMessages,
                   ...(tools.length ? { tools } : {}),
                   // For UI generation: force the model to emit ONE tool_use
