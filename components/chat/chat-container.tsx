@@ -10,6 +10,7 @@ import { TemperatureSlider } from '@/components/controls/temperature-slider'
 import { SystemPromptDialog } from '@/components/controls/system-prompt-dialog'
 import { CostPanel } from '@/components/controls/cost-panel'
 import { useChat } from '@/hooks/use-chat'
+import { useContextHealth } from '@/hooks/use-context-health'
 import type { Conversation, ConvSyncState } from '@/lib/conversations'
 
 interface Props {
@@ -48,6 +49,8 @@ export function ChatContainer({ initialConversation, onSync, onNewChat, sidebarO
     initialUsage: initialConversation?.usage,
     onSync,
   })
+
+  const { isWarn, isDanger, tokenCount } = useContextHealth(messages)
 
   return (
     <div className="flex h-full flex-col max-w-5xl mx-auto w-full border-x border-border/30">
@@ -92,6 +95,18 @@ export function ChatContainer({ initialConversation, onSync, onNewChat, sidebarO
 
       {/* Messages */}
       <ChatMessages messages={messages} isStreaming={isStreaming} />
+
+      {/* Context health warning */}
+      {(isWarn || isDanger) && !isStreaming && (
+        <div className={`max-w-3xl w-full mx-auto px-4 py-1.5`}>
+          <p className={`text-[11px] text-center px-3 py-1 rounded-md ${isDanger ? 'bg-red-500/10 text-red-400' : 'bg-yellow-500/10 text-yellow-500'}`}>
+            {isDanger
+              ? `Context large (~${tokenCount.toLocaleString()} tokens) — server will summarize oldest messages automatically`
+              : `Context growing (~${tokenCount.toLocaleString()} tokens) — summarization triggers at 60k`}
+          </p>
+        </div>
+      )}
+
       {showCost && (
         <div className="max-w-3xl w-full mx-auto px-4">
           <CostPanel usage={usage} messages={messages} onClose={() => setShowCost(false)} />
