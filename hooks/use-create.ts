@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import type { ChatModel, Creation, CreationVersion, UiElement, UiSpec } from '@/lib/types'
 import type { CreationSyncState } from '@/lib/creations'
 import { MODEL_IDS } from '@/lib/models'
+import { getUserId } from '@/lib/user-id'
 import { readStream } from './use-stream-reader'
 
 const CREATE_SYSTEM_PROMPT = `You are a UI dashboard builder.
@@ -134,7 +135,7 @@ export function useCreate(config: CreateConfig = {}) {
       try {
         const res = await fetch('/api/chat', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'X-User-ID': getUserId() },
           signal: ctrl.signal,
           body: JSON.stringify({
             messages: newHistory.map((m) => ({ role: m.role, content: m.content })),

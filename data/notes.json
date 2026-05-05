@@ -16,5 +16,24 @@
       "favorite color"
     ],
     "createdAt": "2026-04-29T20:11:10.718Z"
+  },
+  {
+    "id": "xb9hzfvq28h",
+    "content": "The user's name is Gabriel.",
+    "tags": [
+      "user",
+      "name"
+    ],
+    "createdAt": "2026-05-05T13:52:54.514Z"
+  },
+  {
+    "id": "0zids7byekbm",
+    "content": "User wants a personal budget/expense tracker finance dashboard with placeholder data and dark mode.",
+    "tags": [
+      "dashboard",
+      "finance",
+      "preference"
+    ],
+    "createdAt": "2026-05-05T16:45:52.606Z"
   }
 ]
