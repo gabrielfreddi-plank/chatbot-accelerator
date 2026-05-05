@@ -3,18 +3,22 @@
 import { DollarSign, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import type { CumulativeUsage } from '@/lib/types'
+import type { ChatModel, CumulativeUsage, Message } from '@/lib/types'
 import { calcCost, calcTotalCost, formatCost, MODEL_LABELS } from '@/lib/cost'
-import type { ChatModel } from '@/lib/types'
+import { countTokens } from '@/lib/tokenizer'
 
 interface Props {
   usage: CumulativeUsage
+  messages: Message[]
   onClose: () => void
 }
 
-export function CostPanel({ usage, onClose }: Props) {
+export function CostPanel({ usage, messages, onClose }: Props) {
   const total = calcTotalCost(usage)
   const hasData = usage.totalInputTokens + usage.totalOutputTokens > 0
+  const contextTokens = countTokens(
+    messages.filter((m) => m.role === 'user' || m.role === 'assistant'),
+  )
 
   return (
     <div className="border rounded-xl bg-muted/50 mx-4 p-4 text-sm space-y-3">
@@ -53,6 +57,11 @@ export function CostPanel({ usage, onClose }: Props) {
               {usage.totalOutputTokens.toLocaleString()} out
             </span>
             <span>{formatCost(total)}</span>
+          </div>
+
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>Context now</span>
+            <span>~{contextTokens.toLocaleString()} tokens</span>
           </div>
         </>
       )}

@@ -1,17 +1,19 @@
 'use client'
 
-import { KeyboardEvent, useRef, useState } from 'react'
+import { KeyboardEvent, useMemo, useRef, useState } from 'react'
 import { Send, Square } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { parseCommand, isValidModel, isValidEngine } from '@/lib/commands'
-import type { ChatModel, SearchEngine } from '@/lib/types'
+import type { ChatModel, Message, SearchEngine } from '@/lib/types'
 import { MODEL_LABELS } from '@/lib/cost'
 import { ENGINE_LABELS } from '@/lib/search-engines'
+import { countTextTokens, countTokens } from '@/lib/tokenizer'
 
 interface Props {
   isStreaming: boolean
+  messages: Message[]
   onSend: (text: string) => void
   onStop: () => void
   onModelChange: (model: ChatModel) => void
@@ -23,6 +25,7 @@ interface Props {
 
 export function ChatInput({
   isStreaming,
+  messages,
   onSend,
   onStop,
   onModelChange,
@@ -33,6 +36,12 @@ export function ChatInput({
 }: Props) {
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  const contextTokens = useMemo(
+    () => countTokens(messages.filter((m) => m.role === 'user' || m.role === 'assistant')),
+    [messages],
+  )
+  const inputTokens = useMemo(() => countTextTokens(value), [value])
 
   function handleSubmit() {
     const trimmed = value.trim()
@@ -110,7 +119,7 @@ export function ChatInput({
 
   return (
     <div className="border-t border-border/40 bg-background/90 backdrop-blur-sm shrink-0">
-      <div className="max-w-3xl mx-auto px-4 py-3 flex items-end gap-2.5">
+      <div className="max-w-3xl mx-auto px-4 pt-3 pb-1 flex items-end gap-2.5">
         <Textarea
           ref={textareaRef}
           value={value}
@@ -142,6 +151,11 @@ export function ChatInput({
             <Send className="h-4 w-4" />
           </Button>
         )}
+      </div>
+      <div className="max-w-3xl mx-auto px-4 pb-2 flex justify-end">
+        <span className="text-[11px] text-muted-foreground/50 tabular-nums">
+          {value ? `~${inputTokens} tok` : `ctx ~${contextTokens} tok`}
+        </span>
       </div>
     </div>
   )

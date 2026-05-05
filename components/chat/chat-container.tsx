@@ -94,13 +94,14 @@ export function ChatContainer({ initialConversation, onSync, onNewChat, sidebarO
       <ChatMessages messages={messages} isStreaming={isStreaming} />
       {showCost && (
         <div className="max-w-3xl w-full mx-auto px-4">
-          <CostPanel usage={usage} onClose={() => setShowCost(false)} />
+          <CostPanel usage={usage} messages={messages} onClose={() => setShowCost(false)} />
         </div>
       )}
 
       {/* Input */}
       <ChatInput
         isStreaming={isStreaming}
+        messages={messages}
         onSend={sendMessage}
         onStop={stopStreaming}
         onModelChange={setModel}
