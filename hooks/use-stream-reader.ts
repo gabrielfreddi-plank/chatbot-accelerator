@@ -9,6 +9,8 @@ export type StreamEvent =
   | { type: 'tool_calculate'; expression: string }
   | { type: 'tool_save_note'; content: string }
   | { type: 'tool_read_notes'; filter: string }
+  | { type: 'tool_save_memory'; content: string; category: string }
+  | { type: 'tool_search_memories'; query: string }
   | { type: 'research_step'; step: number; label: string }
   | { type: 'research_queries'; queries: string[] }
   | { type: 'research_search'; query: string }
