@@ -1,5 +1,6 @@
 import Anthropic, { APIError } from '@anthropic-ai/sdk'
 import type { ApiChatRequest, UiSpec } from '@/lib/types'
+import { manageContext } from '@/lib/context-manager'
 import { webSearchTool, executeSearch } from '@/lib/web-search'
 import { readUrlTool, executeReadUrl } from '@/lib/fetch-page'
 import { calculatorTool, executeCalculate } from '@/lib/calculator'
@@ -68,7 +69,11 @@ export async function POST(request: Request) {
       }
 
       void (async () => {
-        let currentMessages: Anthropic.MessageParam[] = messages.map((m) => ({
+        const managedMessages = await manageContext(
+          messages.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+          client,
+        )
+        let currentMessages: Anthropic.MessageParam[] = managedMessages.map((m) => ({
           role: m.role,
           content: m.content,
         }))
