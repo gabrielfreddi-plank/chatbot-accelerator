@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import type { ChatModel, CumulativeUsage, Message, SearchEngine } from '@/lib/types'
 import type { ConvSyncState } from '@/lib/conversations'
 import { MODEL_IDS } from '@/lib/models'
+import { getUserId } from '@/lib/user-id'
 import { readStream } from './use-stream-reader'
 import { useResearch } from './use-research'
 
@@ -139,7 +140,7 @@ export function useChat(config: ChatConfig = {}) {
       try {
         const res = await fetch('/api/chat', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'X-User-ID': getUserId() },
           signal: ctrl.signal,
           body: JSON.stringify({
             messages: [

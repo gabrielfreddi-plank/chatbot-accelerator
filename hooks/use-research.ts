@@ -3,6 +3,7 @@
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 import type { ChatModel, CumulativeUsage, Message, SearchEngine, ApiResearchRequest } from '@/lib/types'
+import { getUserId } from '@/lib/user-id'
 import { readStream } from './use-stream-reader'
 
 function makeId() {
@@ -68,7 +69,7 @@ export function useResearch({
         const body: ApiResearchRequest = { topic, searchEngine }
         const res = await fetch('/api/research', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'X-User-ID': getUserId() },
           signal: ctrl.signal,
           body: JSON.stringify(body),
         })

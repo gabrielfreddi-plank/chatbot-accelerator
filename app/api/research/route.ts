@@ -24,6 +24,8 @@ function extractUrls(searchResult: string): string[] {
 }
 
 export async function POST(request: Request) {
+  const userId = request.headers.get('X-User-ID') ?? ''
+  void userId // will be used for DB persistence in a later phase
   const body: ApiResearchRequest = await request.json()
   const { topic, searchEngine } = body
 

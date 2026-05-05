@@ -41,6 +41,8 @@ function backoff(attempt: number): number {
 }
 
 export async function POST(request: Request) {
+  const userId = request.headers.get('X-User-ID') ?? ''
+  void userId // will be used for DB persistence in a later phase
   const body: ApiChatRequest = await request.json()
   const { messages, model, temperature, systemPrompt, searchEngine, enableUiTool } = body
 
