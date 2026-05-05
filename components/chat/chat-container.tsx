@@ -92,8 +92,6 @@ export function ChatContainer({ initialConversation, onSync, onNewChat, sidebarO
 
       {/* Messages */}
       <ChatMessages messages={messages} isStreaming={isStreaming} />
-
-      {/* Cost panel */}
       {showCost && (
         <div className="max-w-3xl w-full mx-auto px-4">
           <CostPanel usage={usage} onClose={() => setShowCost(false)} />

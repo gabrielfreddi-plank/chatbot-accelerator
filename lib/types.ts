@@ -4,6 +4,20 @@ export type SearchEngine = 'none' | 'brave' | 'tavily'
 
 export type MessageRole = 'user' | 'assistant' | 'tool_status'
 
+export interface UiElement {
+  type: string
+  props: Record<string, unknown>
+  children?: string[]
+  on?: Record<string, { action: string; params?: Record<string, unknown> }>
+  visible?: { $state: string; eq: unknown }
+}
+
+export interface UiSpec {
+  root: string
+  elements: Record<string, UiElement>
+  state?: Record<string, unknown>
+}
+
 export interface Message {
   id: string
   role: MessageRole
@@ -14,6 +28,24 @@ export interface Message {
   toolDetail?: string
   toolResult?: string
   toolResultKind?: string
+}
+
+export interface CreationVersion {
+  prompt: string
+  spec: UiSpec
+  timestamp: string
+}
+
+export interface Creation {
+  id: string
+  title: string
+  versions: CreationVersion[]
+  activeVersionIndex: number
+  model: ChatModel
+  temperature: number
+  history: { role: 'user' | 'assistant'; content: string }[]
+  createdAt: string
+  updatedAt: string
 }
 
 export interface TokenUsage {
@@ -43,6 +75,7 @@ export interface ApiChatRequest {
   temperature: number
   systemPrompt: string
   searchEngine?: SearchEngine
+  enableUiTool?: boolean
 }
 
 export interface ApiResearchRequest {

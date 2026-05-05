@@ -1,6 +1,6 @@
 # Chatbot Accelerator
 
-Production-ready streaming chatbot template built on Next.js 16 and the Anthropic SDK. Fork and extend for any Claude-powered chat application.
+Production-ready streaming chatbot template built on Next.js 16 and the Anthropic SDK. Two sections: **Chat** for conversational AI and **Create** for generative UI dashboards. Fork and extend for any Claude-powered application.
 
 ## Quick Start
 
@@ -52,6 +52,15 @@ Assistant messages render full GitHub-flavored markdown: headings, bold/italic, 
 ### Syntax Highlighting
 Fenced code blocks in assistant messages are highlighted via Prism (`oneDark` theme) with language detection from the opening fence. Includes a one-click copy button that confirms with a checkmark icon.
 
+### Generative UI (Create Section)
+The **Create** tab is a dedicated UI builder. Describe a dashboard or interface in natural language and Claude generates it using a 20-component catalog (charts, tables, forms, cards, interactive elements). Each generation is saved as a version — click any version to restore it. Submit follow-up prompts to iteratively refine the UI; the AI receives the current spec as context and makes targeted modifications.
+
+### Version History
+Every prompt in the Create section produces a versioned snapshot of the generated UI. A timeline bar shows all versions with a collapsible prompt history. Click any version to preview it, or submit a new prompt from a previous version to branch from that point (later versions are truncated).
+
+### Persistence
+Both conversations and creations persist in `localStorage`. Switch between items via the sidebar. The active section (Chat or Create) and active item are restored on reload.
+
 ## Slash Commands
 
 Type these directly in the chat input:
@@ -68,25 +77,28 @@ Type these directly in the chat input:
 ## Architecture
 
 ```
-app/api/chat/route.ts      ← POST Route Handler; streams SSE events
-app/api/research/route.ts  ← POST Route Handler; runs 4-step research pipeline
-hooks/use-chat.ts          ← Message state, model, temperature, usage
-hooks/use-research.ts      ← Research pipeline state and streaming
-hooks/use-stream-reader.ts ← Reads ReadableStream, dispatches SSE events
-lib/types.ts               ← Shared TypeScript types
-lib/cost.ts                ← Pricing table + cost calculation
-lib/commands.ts            ← Slash command parser
-lib/models.ts              ← Model ID constants
-lib/web-search.ts          ← web_search tool definition + Brave/Tavily execution
-lib/fetch-page.ts          ← read_url tool definition + URL fetch + HTML stripping
-lib/calculator.ts          ← calculate tool definition + safe math parser
-lib/note-store.ts          ← save_note/read_notes tools + file-based persistence
-lib/search-engines.ts      ← Engine labels
-components/chat/           ← Chat UI (container, messages, input, bubbles)
-components/controls/       ← Model selector, temperature slider, system prompt, cost panel
+components/app-shell.tsx       ← Top-level shell: Chat/Create tabs, sidebar routing
+components/chat/               ← Chat UI (container, messages, input, bubbles)
+components/create/             ← Create UI (container, canvas, version timeline, input)
+components/controls/           ← Model selector, temperature slider, system prompt, cost panel
+components/generated/          ← Generated UI components (charts, tables, forms, cards)
+app/api/chat/route.ts          ← POST Route Handler; streams SSE (enableUiTool flag)
+app/api/research/route.ts      ← POST Route Handler; runs 4-step research pipeline
+hooks/use-chat.ts              ← Chat state (messages, model, temp, usage)
+hooks/use-create.ts            ← Create state (canvas, versions, streaming)
+hooks/use-creations.ts         ← Creation list state (CRUD, switching)
+hooks/use-conversations.ts     ← Conversation list state (CRUD, switching)
+hooks/use-stream-reader.ts     ← Reads ReadableStream, dispatches SSE events
+lib/types.ts                   ← Shared types (Message, Creation, UiSpec, etc.)
+lib/conversations.ts           ← Conversation persistence (localStorage)
+lib/creations.ts               ← Creation persistence (localStorage)
+lib/ui-catalog.ts              ← 20-component catalog + render_ui tool
+lib/ui-registry.tsx            ← Component name → React implementation map
 ```
 
-**Request flow:** `ChatInput` → slash command check → `sendMessage` → `POST /api/chat` → SSE stream → `use-stream-reader` → tokens appended to active message + usage accumulated.
+**Chat flow:** `ChatInput` → slash command check → `sendMessage` → `POST /api/chat` → SSE stream → `use-stream-reader` → tokens appended to active message + usage accumulated.
+
+**Create flow:** `CreateInput` → `sendPrompt` → `POST /api/chat` with `enableUiTool: true` → SSE stream with `ui_component` events → each element merged into canvas state → on `ui_render`, snapshot saved as `CreationVersion`.
 
 **Research flow:** `/research <topic>` → `useResearch` → `POST /api/research` → Haiku generates queries → web search → URL fetch → Sonnet synthesis → SSE stream to client.
 
