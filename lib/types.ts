@@ -2,7 +2,7 @@ export type ChatModel = 'opus' | 'sonnet' | 'haiku'
 
 export type SearchEngine = 'none' | 'brave' | 'tavily'
 
-export type MessageRole = 'user' | 'assistant' | 'tool_status'
+export type MessageRole = 'user' | 'assistant' | 'tool_status' | 'system_event'
 
 export interface UiElement {
   type: string

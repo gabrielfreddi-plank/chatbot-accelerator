@@ -23,11 +23,11 @@ export function CostPanel({ usage, messages, onClose }: Props) {
   return (
     <div className="border rounded-xl bg-muted/50 mx-4 p-4 text-sm space-y-3">
       <div className="flex items-center justify-between">
-        <span className="font-medium flex items-center gap-1.5">
-          <DollarSign className="h-4 w-4" />
-          Token Usage & Cost
-        </span>
-        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>
+        <h3 className="font-medium flex items-center gap-1.5">
+          <DollarSign className="h-4 w-4" aria-hidden="true" />
+          Token Usage &amp; Cost
+        </h3>
+        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose} aria-label="Close cost panel">
           <X className="h-3 w-3" />
         </Button>
       </div>
@@ -39,30 +39,44 @@ export function CostPanel({ usage, messages, onClose }: Props) {
           {Object.entries(usage.usageByModel).map(([key, u]) => (
             <div key={key} className="space-y-1">
               <p className="font-medium text-xs">{MODEL_LABELS[key as ChatModel] ?? key}</p>
-              <div className="grid grid-cols-3 gap-1 text-xs text-muted-foreground">
-                <span>Input: {u.inputTokens.toLocaleString()}</span>
-                <span>Output: {u.outputTokens.toLocaleString()}</span>
-                <span className="text-foreground font-medium">
-                  {formatCost(calcCost(key as ChatModel, u.inputTokens, u.outputTokens))}
-                </span>
-              </div>
+              <dl className="grid grid-cols-3 gap-1 text-xs text-muted-foreground">
+                <div>
+                  <dt className="sr-only">Input tokens</dt>
+                  <dd>Input: {u.inputTokens.toLocaleString()}</dd>
+                </div>
+                <div>
+                  <dt className="sr-only">Output tokens</dt>
+                  <dd>Output: {u.outputTokens.toLocaleString()}</dd>
+                </div>
+                <div>
+                  <dt className="sr-only">Cost</dt>
+                  <dd className="text-foreground font-medium">
+                    {formatCost(calcCost(key as ChatModel, u.inputTokens, u.outputTokens))}
+                  </dd>
+                </div>
+              </dl>
             </div>
           ))}
 
           <Separator />
 
-          <div className="flex justify-between text-xs font-medium">
-            <span>
-              Total: {usage.totalInputTokens.toLocaleString()} in /{' '}
-              {usage.totalOutputTokens.toLocaleString()} out
-            </span>
-            <span>{formatCost(total)}</span>
-          </div>
-
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Context now</span>
-            <span>~{contextTokens.toLocaleString()} tokens</span>
-          </div>
+          <dl className="space-y-1 text-xs">
+            <div className="flex justify-between font-medium">
+              <dt>Total tokens</dt>
+              <dd>
+                {usage.totalInputTokens.toLocaleString()} in /{' '}
+                {usage.totalOutputTokens.toLocaleString()} out
+              </dd>
+            </div>
+            <div className="flex justify-between font-medium">
+              <dt>Estimated cost</dt>
+              <dd>{formatCost(total)}</dd>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <dt>Context now</dt>
+              <dd>~{contextTokens.toLocaleString()} tokens</dd>
+            </div>
+          </dl>
         </>
       )}
     </div>

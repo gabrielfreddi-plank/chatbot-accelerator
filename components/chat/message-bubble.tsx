@@ -20,22 +20,29 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
   }
 
   return (
-    <div className="relative mb-3 last:mb-0">
-      <button
-        onClick={handleCopy}
-        className="absolute right-2 top-2 z-10 rounded p-1 text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors"
-        title="Copy code"
-      >
-        {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-      </button>
-      <SyntaxHighlighter
-        style={oneDark}
-        language={language}
-        PreTag="div"
-        className="!rounded-lg !text-xs"
-      >
-        {code}
-      </SyntaxHighlighter>
+    <div className="mb-3 last:mb-0 rounded-lg overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-zinc-800 border-b border-white/5">
+        <span className="text-[11px] text-muted-foreground/50 font-mono">{language}</span>
+        <button
+          onClick={handleCopy}
+          className="rounded p-1 text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors"
+          title="Copy code"
+          aria-label="Copy code"
+        >
+          {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+        </button>
+      </div>
+      <div className="overflow-x-auto">
+        <SyntaxHighlighter
+          style={oneDark}
+          language={language}
+          PreTag="div"
+          wrapLongLines={false}
+          className="!rounded-none !text-xs !m-0"
+        >
+          {code}
+        </SyntaxHighlighter>
+      </div>
     </div>
   )
 }
@@ -55,7 +62,7 @@ function SearchResultList({ result }: { result: string }) {
     <div className="flex flex-col gap-1.5 mt-0.5">
       {items.map((item, i) => (
         <div key={i} className="rounded-lg bg-background/50 border border-border/25 p-2 space-y-0.5">
-          <p className="text-[11px] font-medium text-foreground/85 line-clamp-2 leading-tight">
+          <p className="text-xs font-medium text-foreground/85 line-clamp-2 leading-tight">
             {item.title}
           </p>
           {item.url.startsWith('http') && (
@@ -63,13 +70,13 @@ function SearchResultList({ result }: { result: string }) {
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[10px] text-indigo-400/70 hover:text-indigo-400 transition-colors truncate block"
+              className="text-xs text-muted-foreground hover:text-indigo-400 transition-colors truncate block"
             >
               {item.url}
             </a>
           )}
           {item.snippet && (
-            <p className="text-[10px] text-muted-foreground/60 line-clamp-2 leading-relaxed">
+            <p className="text-xs text-muted-foreground/70 line-clamp-2 leading-relaxed">
               {item.snippet}
             </p>
           )}
@@ -84,7 +91,7 @@ function ToolResultContent({ result, kind }: { result: string; kind: string }) {
     return <SearchResultList result={result} />
   }
   return (
-    <p className="font-mono text-[11px] text-muted-foreground break-words leading-relaxed whitespace-pre-wrap mt-0.5">
+    <p className="font-mono text-xs text-muted-foreground break-words leading-relaxed whitespace-pre-wrap mt-0.5">
       {result}
     </p>
   )
@@ -99,7 +106,7 @@ function ToolStatusCard({ message }: { message: Message }) {
     <div className="flex w-full justify-start py-0.5">
       <div
         className={cn(
-          'w-72 rounded-xl border text-xs overflow-hidden transition-all duration-200',
+          'w-full max-w-xs rounded-xl border text-xs overflow-hidden transition-all duration-200',
           isDone
             ? 'border-emerald-500/25 bg-emerald-500/[0.06]'
             : 'border-indigo-500/25 bg-indigo-500/[0.06]',
@@ -107,6 +114,7 @@ function ToolStatusCard({ message }: { message: Message }) {
       >
         <button
           onClick={() => hasContent && setExpanded((v) => !v)}
+          aria-expanded={hasContent ? expanded : undefined}
           className={cn(
             'flex items-center gap-2.5 px-3 py-2 w-full text-left transition-colors',
             hasContent && 'hover:bg-white/5 cursor-pointer',
@@ -133,7 +141,7 @@ function ToolStatusCard({ message }: { message: Message }) {
             {message.toolResult ? (
               <ToolResultContent result={message.toolResult} kind={message.toolResultKind ?? ''} />
             ) : message.toolDetail ? (
-              <p className="font-mono text-[11px] text-muted-foreground break-all leading-relaxed">
+              <p className="font-mono text-xs text-muted-foreground break-all leading-relaxed">
                 {message.toolDetail}
               </p>
             ) : null}
@@ -156,13 +164,26 @@ export function MessageBubble({ message, isStreaming }: Props) {
     return <ToolStatusCard message={message} />
   }
 
+  if (message.role === 'system_event') {
+    return (
+      <div className="flex items-center gap-3 py-1" role="status">
+        <div className="flex-1 h-px bg-border/30" />
+        <span className="text-xs text-muted-foreground/50 shrink-0">{message.content}</span>
+        <div className="flex-1 h-px bg-border/30" />
+      </div>
+    )
+  }
+
   return (
-    <div className={cn('flex w-full', isUser ? 'justify-end' : 'justify-start')}>
+    <article
+      className={cn('flex w-full', isUser ? 'justify-end' : 'justify-start')}
+      aria-label={`${isUser ? 'You' : 'Assistant'}: ${message.content.slice(0, 80)}`}
+    >
       <div
         className={cn(
           'max-w-[78%] rounded-2xl text-sm leading-relaxed',
           isUser
-            ? 'bg-indigo-600 text-white px-4 py-2.5 rounded-br-sm shadow-md shadow-indigo-900/20'
+            ? 'bg-indigo-600 text-white px-4 py-3 rounded-br-sm shadow-sm'
             : 'bg-card border border-border/50 px-4 py-3 rounded-bl-sm shadow-sm',
         )}
       >
@@ -233,11 +254,11 @@ export function MessageBubble({ message, isStreaming }: Props) {
           </span>
         )}
         {!isUser && message.model && (
-          <div className="mt-2 text-[10px] text-muted-foreground/50 font-medium tracking-wide">
+          <div className="mt-2 text-xs text-muted-foreground/60 font-medium tracking-wide">
             {MODEL_LABELS[message.model]}
           </div>
         )}
       </div>
-    </div>
+    </article>
   )
 }

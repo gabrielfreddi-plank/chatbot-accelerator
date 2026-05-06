@@ -12,6 +12,12 @@ import { MODEL_LABELS } from '@/lib/cost'
 
 const MODELS: ChatModel[] = ['opus', 'sonnet', 'haiku']
 
+const MODEL_HINTS: Record<ChatModel, string> = {
+  opus: 'Most capable · $$$',
+  sonnet: 'Balanced · $$',
+  haiku: 'Fastest · $',
+}
+
 interface Props {
   value: ChatModel
   onChange: (model: ChatModel) => void
@@ -27,7 +33,10 @@ export function ModelSelector({ value, onChange, disabled }: Props) {
       <SelectContent>
         {MODELS.map((m) => (
           <SelectItem key={m} value={m} className="text-xs">
-            {MODEL_LABELS[m]}
+            <div className="flex flex-col gap-0.5">
+              <span>{MODEL_LABELS[m]}</span>
+              <span className="text-[11px] text-muted-foreground/60">{MODEL_HINTS[m]}</span>
+            </div>
           </SelectItem>
         ))}
       </SelectContent>
