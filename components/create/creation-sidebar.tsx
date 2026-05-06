@@ -1,6 +1,7 @@
 'use client'
 
 import { Blocks, Plus, Trash2, X } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { relativeTime } from '@/lib/conversations'
 import type { Creation } from '@/lib/types'
@@ -16,8 +17,22 @@ interface Props {
 }
 
 export function CreationSidebar({ creations, activeId, onNew, onSwitch, onDelete, onClose }: Props) {
+  function handleDelete(creation: Creation, e: React.MouseEvent) {
+    e.stopPropagation()
+    onDelete(creation.id)
+    toast('Creation deleted', {
+      action: {
+        label: 'Undo',
+        onClick: () => {
+          toast.info('Undo not available — creation has been deleted.')
+        },
+      },
+      duration: 4000,
+    })
+  }
+
   return (
-    <aside className="flex flex-col w-60 shrink-0 border-r border-border/40 bg-background overflow-hidden">
+    <aside className="flex flex-col w-56 shrink-0 border-r border-border/40 bg-background overflow-hidden">
       <div className="flex items-center justify-between px-3 py-3 border-b border-border/30 shrink-0">
         <span className="text-[11px] font-semibold text-muted-foreground/60 tracking-widest uppercase">
           Creations
@@ -66,21 +81,18 @@ export function CreationSidebar({ creations, activeId, onNew, onSwitch, onDelete
             />
             <div className="flex-1 min-w-0">
               <p className="truncate font-medium leading-tight">{creation.title}</p>
-              <p className="text-[10px] text-muted-foreground/50 mt-0.5" suppressHydrationWarning>
+              <p className="text-xs text-muted-foreground/60 mt-0.5" suppressHydrationWarning>
                 {creation.versions.length > 0
                   ? `${creation.versions.length} version${creation.versions.length > 1 ? 's' : ''}`
-                  : 'Empty'}
+                  : 'New'}
                 {' · '}
                 {relativeTime(creation.updatedAt)}
               </p>
             </div>
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onDelete(creation.id)
-              }}
+              onClick={(e) => handleDelete(creation, e)}
               className="shrink-0 p-0.5 rounded opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-destructive transition-all"
-              title="Delete"
+              title="Delete creation"
             >
               <Trash2 className="h-3 w-3" />
             </button>
