@@ -38,6 +38,7 @@ export function ChatContainer({ initialConversation, onSync, onNewChat, sidebarO
     showCost,
     setShowCost,
     sendMessage,
+    addSystemEvent,
     runResearch,
     stopStreaming,
   } = useChat({
@@ -124,6 +125,7 @@ export function ChatContainer({ initialConversation, onSync, onNewChat, sidebarO
         onSystemChange={setSystemPrompt}
         onShowCost={() => setShowCost((v) => !v)}
         onResearch={runResearch}
+        onAddSystemEvent={addSystemEvent}
       />
     </div>
   )
