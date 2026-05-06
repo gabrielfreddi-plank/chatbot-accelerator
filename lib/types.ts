@@ -23,6 +23,9 @@ export interface Message {
   role: MessageRole
   content: string
   model?: ChatModel
+  createdAt?: number
+  status?: 'error'
+  errorMessage?: string
   toolStatus?: 'pending' | 'done'
   toolLabel?: string
   toolDetail?: string

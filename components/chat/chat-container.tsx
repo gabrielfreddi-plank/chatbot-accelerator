@@ -38,6 +38,8 @@ export function ChatContainer({ initialConversation, onSync, onNewChat, sidebarO
     showCost,
     setShowCost,
     sendMessage,
+    addSystemEvent,
+    retryMessage,
     runResearch,
     stopStreaming,
   } = useChat({
@@ -66,9 +68,9 @@ export function ChatContainer({ initialConversation, onSync, onNewChat, sidebarO
           >
             <Menu className="h-4 w-4" />
           </Button>
-          <span className="font-semibold text-sm tracking-tight">Chatbot Accelerator</span>
+          <span className="font-semibold text-base tracking-tight">Chatbot Accelerator</span>
           {(isStreaming || isSearching) && (
-            <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Loader2 className="h-3 w-3 animate-spin" />
               {isSearching ? 'searching…' : 'streaming…'}
             </span>
@@ -94,12 +96,12 @@ export function ChatContainer({ initialConversation, onSync, onNewChat, sidebarO
       </header>
 
       {/* Messages */}
-      <ChatMessages messages={messages} isStreaming={isStreaming} />
+      <ChatMessages messages={messages} isStreaming={isStreaming} onRetry={retryMessage} />
 
       {/* Context health warning */}
       {(isWarn || isDanger) && !isStreaming && (
-        <div className={`max-w-3xl w-full mx-auto px-4 py-1.5`}>
-          <p className={`text-[11px] text-center px-3 py-1 rounded-md ${isDanger ? 'bg-red-500/10 text-red-400' : 'bg-yellow-500/10 text-yellow-500'}`}>
+        <div className="max-w-3xl w-full mx-auto px-4 py-1.5">
+          <p className={`text-xs text-center px-3 py-1 rounded-md ${isDanger ? 'bg-red-500/10 text-red-400' : 'bg-yellow-500/10 text-yellow-500'}`}>
             {isDanger
               ? `Context large (~${tokenCount.toLocaleString()} tokens) — server will summarize oldest messages automatically`
               : `Context growing (~${tokenCount.toLocaleString()} tokens) — summarization triggers at 60k`}
@@ -124,6 +126,7 @@ export function ChatContainer({ initialConversation, onSync, onNewChat, sidebarO
         onSystemChange={setSystemPrompt}
         onShowCost={() => setShowCost((v) => !v)}
         onResearch={runResearch}
+        onAddSystemEvent={addSystemEvent}
       />
     </div>
   )
