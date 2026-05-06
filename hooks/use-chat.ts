@@ -247,6 +247,13 @@ export function useChat(config: ChatConfig = {}) {
     abortRef.current?.abort()
   }, [])
 
+  const addSystemEvent = useCallback((text: string) => {
+    setMessages((prev) => [
+      ...prev,
+      { id: makeId(), role: 'system_event' as const, content: text },
+    ])
+  }, [])
+
   const clearHistory = useCallback(() => {
     setMessages([])
     setUsage(emptyUsage())
@@ -276,6 +283,7 @@ export function useChat(config: ChatConfig = {}) {
     showCost,
     setShowCost,
     sendMessage,
+    addSystemEvent,
     runResearch,
     stopStreaming,
     clearHistory,

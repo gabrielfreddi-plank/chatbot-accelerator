@@ -11,6 +11,8 @@ import { MODEL_LABELS } from '@/lib/cost'
 import { ENGINE_LABELS } from '@/lib/search-engines'
 import { countTextTokens, countTokens } from '@/lib/tokenizer'
 
+const VALID_COMMANDS = '/cost, /model, /engine, /fetchpage, /system, /research'
+
 interface Props {
   isStreaming: boolean
   messages: Message[]
@@ -21,6 +23,7 @@ interface Props {
   onSystemChange: (prompt: string) => void
   onShowCost: () => void
   onResearch: (topic: string) => void
+  onAddSystemEvent: (text: string) => void
 }
 
 export function ChatInput({
@@ -33,6 +36,7 @@ export function ChatInput({
   onSystemChange,
   onShowCost,
   onResearch,
+  onAddSystemEvent,
 }: Props) {
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -64,7 +68,7 @@ export function ChatInput({
             return
           }
           onModelChange(cmd.name)
-          toast.success(`Switched to ${MODEL_LABELS[cmd.name]}`)
+          onAddSystemEvent(`Model switched to ${MODEL_LABELS[cmd.name]}`)
           return
         case 'engine':
           if (!cmd.name) {
@@ -101,7 +105,7 @@ export function ChatInput({
           onResearch(cmd.topic)
           return
         case 'unknown':
-          toast.error(`Unknown command: ${cmd.raw}`)
+          toast.error(`Unknown command "${cmd.raw}". Valid: ${VALID_COMMANDS}`)
           return
       }
     }
@@ -125,7 +129,8 @@ export function ChatInput({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Message… or /cost, /model, /engine, /fetchpage, /system, /research"
+          placeholder="Message… (type / for commands)"
+          aria-label="Message"
           className="min-h-[44px] max-h-40 resize-none flex-1 bg-muted/40 border-border/50 focus-visible:ring-indigo-500/30 focus-visible:border-indigo-500/40 placeholder:text-muted-foreground/50 text-sm"
           rows={1}
           disabled={isStreaming}
@@ -133,9 +138,10 @@ export function ChatInput({
         {isStreaming ? (
           <Button
             size="icon"
-            variant="destructive"
+            variant="secondary"
             onClick={onStop}
-            title="Stop"
+            title="Stop generating"
+            aria-label="Stop generating"
             className="shrink-0"
           >
             <Square className="h-4 w-4" />
@@ -145,7 +151,8 @@ export function ChatInput({
             size="icon"
             onClick={handleSubmit}
             disabled={!value.trim()}
-            title="Send"
+            title="Send message"
+            aria-label="Send message"
             className="shrink-0 bg-indigo-600 hover:bg-indigo-500 text-white border-0"
           >
             <Send className="h-4 w-4" />
@@ -153,8 +160,8 @@ export function ChatInput({
         )}
       </div>
       <div className="max-w-3xl mx-auto px-4 pb-2 flex justify-end">
-        <span className="text-[11px] text-muted-foreground/50 tabular-nums">
-          {value ? `~${inputTokens} tok` : `ctx ~${contextTokens} tok`}
+        <span className="text-xs text-muted-foreground/70 tabular-nums" title="Estimated token count">
+          {value ? `~${inputTokens} tokens` : `Context: ~${contextTokens} tokens`}
         </span>
       </div>
     </div>

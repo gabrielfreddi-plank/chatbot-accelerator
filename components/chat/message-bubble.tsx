@@ -20,22 +20,29 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
   }
 
   return (
-    <div className="relative mb-3 last:mb-0">
-      <button
-        onClick={handleCopy}
-        className="absolute right-2 top-2 z-10 rounded p-1 text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors"
-        title="Copy code"
-      >
-        {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-      </button>
-      <SyntaxHighlighter
-        style={oneDark}
-        language={language}
-        PreTag="div"
-        className="!rounded-lg !text-xs"
-      >
-        {code}
-      </SyntaxHighlighter>
+    <div className="mb-3 last:mb-0 rounded-lg overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-zinc-800 border-b border-white/5">
+        <span className="text-[11px] text-muted-foreground/50 font-mono">{language}</span>
+        <button
+          onClick={handleCopy}
+          className="rounded p-1 text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors"
+          title="Copy code"
+          aria-label="Copy code"
+        >
+          {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+        </button>
+      </div>
+      <div className="overflow-x-auto">
+        <SyntaxHighlighter
+          style={oneDark}
+          language={language}
+          PreTag="div"
+          wrapLongLines={false}
+          className="!rounded-none !text-xs !m-0"
+        >
+          {code}
+        </SyntaxHighlighter>
+      </div>
     </div>
   )
 }
@@ -55,7 +62,7 @@ function SearchResultList({ result }: { result: string }) {
     <div className="flex flex-col gap-1.5 mt-0.5">
       {items.map((item, i) => (
         <div key={i} className="rounded-lg bg-background/50 border border-border/25 p-2 space-y-0.5">
-          <p className="text-[11px] font-medium text-foreground/85 line-clamp-2 leading-tight">
+          <p className="text-xs font-medium text-foreground/85 line-clamp-2 leading-tight">
             {item.title}
           </p>
           {item.url.startsWith('http') && (
@@ -63,13 +70,13 @@ function SearchResultList({ result }: { result: string }) {
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[10px] text-indigo-400/70 hover:text-indigo-400 transition-colors truncate block"
+              className="text-xs text-muted-foreground hover:text-indigo-400 transition-colors truncate block"
             >
               {item.url}
             </a>
           )}
           {item.snippet && (
-            <p className="text-[10px] text-muted-foreground/60 line-clamp-2 leading-relaxed">
+            <p className="text-xs text-muted-foreground/70 line-clamp-2 leading-relaxed">
               {item.snippet}
             </p>
           )}
@@ -156,6 +163,16 @@ export function MessageBubble({ message, isStreaming }: Props) {
     return <ToolStatusCard message={message} />
   }
 
+  if (message.role === 'system_event') {
+    return (
+      <div className="flex items-center gap-3 py-1">
+        <div className="flex-1 h-px bg-border/30" />
+        <span className="text-xs text-muted-foreground/50 shrink-0">{message.content}</span>
+        <div className="flex-1 h-px bg-border/30" />
+      </div>
+    )
+  }
+
   return (
     <div className={cn('flex w-full', isUser ? 'justify-end' : 'justify-start')}>
       <div
@@ -233,7 +250,7 @@ export function MessageBubble({ message, isStreaming }: Props) {
           </span>
         )}
         {!isUser && message.model && (
-          <div className="mt-2 text-[10px] text-muted-foreground/50 font-medium tracking-wide">
+          <div className="mt-2 text-xs text-muted-foreground/60 font-medium tracking-wide">
             {MODEL_LABELS[message.model]}
           </div>
         )}
