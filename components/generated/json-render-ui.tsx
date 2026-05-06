@@ -73,7 +73,7 @@ export function JsonRenderUI({ spec, loading, onAction }: Props) {
       <div className="w-full rounded-xl border border-indigo-500/20 bg-indigo-500/[0.04] p-4">
         <div className="flex items-center gap-2.5 mb-3">
           <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-400 shrink-0" />
-          <span className="text-xs text-muted-foreground/70">Building UI…</span>
+          <span className="text-sm text-muted-foreground">Building UI…</span>
         </div>
         <div className="space-y-2">
           <div className="h-2.5 rounded bg-white/5 animate-pulse" />
@@ -168,8 +168,8 @@ export function JsonRenderUI({ spec, loading, onAction }: Props) {
   return (
     <div className="w-full space-y-3">
       {loading && (
-        <div className="flex items-center gap-2 text-[11px] text-muted-foreground/50">
-          <Loader2 className="h-3 w-3 animate-spin shrink-0" />
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
           Building UI…
         </div>
       )}

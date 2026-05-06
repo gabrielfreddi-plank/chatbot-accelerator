@@ -21,10 +21,11 @@ export function ChatMessages({ messages, isStreaming }: Props) {
       <div className="flex flex-1 items-center justify-center">
         <div className="text-center space-y-2">
           <p className="text-sm text-muted-foreground">Start a conversation</p>
-          <p className="text-xs text-muted-foreground/50">
-            Type a message or use{' '}
-            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground">/help</code>
-            {' '}for commands
+          <p className="text-xs text-muted-foreground/70">
+            Type <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">/model</code>{' '}
+            to switch models,{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">/research</code>{' '}
+            for deep research
           </p>
         </div>
       </div>

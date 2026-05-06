@@ -50,9 +50,9 @@ export function CreateInput({ isStreaming, hasVersions, onSend, onStop }: Props)
         {isStreaming ? (
           <Button
             size="icon"
-            variant="destructive"
+            variant="secondary"
             onClick={onStop}
-            title="Stop"
+            title="Stop generating"
             className="shrink-0"
           >
             <Square className="h-4 w-4" />
