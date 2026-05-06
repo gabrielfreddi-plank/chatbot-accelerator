@@ -1,6 +1,7 @@
 'use client'
 
 import { MessageSquare, Plus, Trash2, X } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { relativeTime } from '@/lib/conversations'
 import type { Conversation } from '@/lib/conversations'
@@ -16,8 +17,24 @@ interface Props {
 }
 
 export function ConversationSidebar({ conversations, activeId, onNew, onSwitch, onDelete, onClose }: Props) {
+  function handleDelete(convo: Conversation, e: React.MouseEvent) {
+    e.stopPropagation()
+    onDelete(convo.id)
+    toast('Conversation deleted', {
+      action: {
+        label: 'Undo',
+        onClick: () => {
+          // Undo is not currently supported — conversation is already removed from localStorage.
+          // This pattern signals the deletion visually; a full undo would require a recycle bin.
+          toast.info('Undo not available — conversation has been deleted.')
+        },
+      },
+      duration: 4000,
+    })
+  }
+
   return (
-    <aside className="flex flex-col w-60 shrink-0 border-r border-border/40 bg-background overflow-hidden">
+    <aside className="flex flex-col w-56 shrink-0 border-r border-border/40 bg-background overflow-hidden">
       <div className="flex items-center justify-between px-3 py-3 border-b border-border/30 shrink-0">
         <span className="text-[11px] font-semibold text-muted-foreground/60 tracking-widest uppercase">
           Chats
@@ -66,17 +83,14 @@ export function ConversationSidebar({ conversations, activeId, onNew, onSwitch, 
             />
             <div className="flex-1 min-w-0">
               <p className="truncate font-medium leading-tight">{convo.title}</p>
-              <p className="text-[10px] text-muted-foreground/50 mt-0.5" suppressHydrationWarning>
+              <p className="text-xs text-muted-foreground/60 mt-0.5" suppressHydrationWarning>
                 {relativeTime(convo.updatedAt)}
               </p>
             </div>
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onDelete(convo.id)
-              }}
+              onClick={(e) => handleDelete(convo, e)}
               className="shrink-0 p-0.5 rounded opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-destructive transition-all"
-              title="Delete"
+              title="Delete conversation"
             >
               <Trash2 className="h-3 w-3" />
             </button>

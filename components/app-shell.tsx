@@ -39,39 +39,41 @@ export function AppShell() {
 
   return (
     <div className="flex h-full w-full overflow-hidden">
-      {/* Sidebar */}
-      {sidebarOpen && (
-        <div className="flex flex-col shrink-0 overflow-hidden">
-          {/* Mode tabs at the top of the sidebar */}
-          <div className="flex border-b border-border/40 bg-background shrink-0">
-            <button
-              onClick={() => switchMode('chat')}
-              className={cn(
-                'flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 text-[11px] font-semibold tracking-wide transition-colors',
-                mode === 'chat'
-                  ? 'text-indigo-400 border-b-2 border-indigo-500'
-                  : 'text-muted-foreground/60 hover:text-muted-foreground border-b-2 border-transparent',
-              )}
-            >
-              <MessageSquare className="h-3.5 w-3.5" />
-              Chat
-            </button>
-            <button
-              onClick={() => switchMode('create')}
-              className={cn(
-                'flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 text-[11px] font-semibold tracking-wide transition-colors',
-                mode === 'create'
-                  ? 'text-violet-400 border-b-2 border-violet-500'
-                  : 'text-muted-foreground/60 hover:text-muted-foreground border-b-2 border-transparent',
-              )}
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              Create
-            </button>
-          </div>
+      {/* Left column: mode tabs (always visible) + optional sidebar list */}
+      <div className="flex shrink-0">
+        {/* Mode tabs — always visible regardless of sidebar state */}
+        <div className="flex flex-col border-r border-border/40 bg-background shrink-0">
+          <button
+            onClick={() => switchMode('chat')}
+            title="Chat"
+            className={cn(
+              'flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-semibold tracking-wide transition-colors border-b border-border/20',
+              mode === 'chat'
+                ? 'text-indigo-400 bg-indigo-500/[0.07]'
+                : 'text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/30',
+            )}
+          >
+            <MessageSquare className="h-4 w-4" />
+            <span className="text-[10px]">Chat</span>
+          </button>
+          <button
+            onClick={() => switchMode('create')}
+            title="Create"
+            className={cn(
+              'flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-semibold tracking-wide transition-colors border-b border-border/20',
+              mode === 'create'
+                ? 'text-violet-400 bg-violet-500/[0.07]'
+                : 'text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/30',
+            )}
+          >
+            <Sparkles className="h-4 w-4" />
+            <span className="text-[10px]">Create</span>
+          </button>
+        </div>
 
-          {/* Section-specific sidebar content */}
-          {mode === 'chat' ? (
+        {/* Sidebar list — conditional on sidebarOpen */}
+        {sidebarOpen && (
+          mode === 'chat' ? (
             <ConversationSidebar
               conversations={conversations.conversations}
               activeId={conversations.activeId}
@@ -89,9 +91,9 @@ export function AppShell() {
               onDelete={creations.deleteCreation}
               onClose={() => setSidebarOpen(false)}
             />
-          )}
-        </div>
-      )}
+          )
+        )}
+      </div>
 
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden min-w-0">
