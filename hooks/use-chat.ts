@@ -94,7 +94,7 @@ export function useChat(config: ChatConfig = {}) {
 
   const sendMessage = useCallback(
     async (content: string) => {
-      const userMsg: Message = { id: makeId(), role: 'user', content }
+      const userMsg: Message = { id: makeId(), role: 'user', content, createdAt: Date.now() }
       const assistantId = makeId()
       const currentModel = model
       const pendingToolIds: string[] = []
@@ -102,7 +102,7 @@ export function useChat(config: ChatConfig = {}) {
       setMessages((prev) => [
         ...prev,
         userMsg,
-        { id: assistantId, role: 'assistant', content: '', model: currentModel },
+        { id: assistantId, role: 'assistant', content: '', model: currentModel, createdAt: Date.now() },
       ])
       setIsStreaming(true)
 
@@ -221,14 +221,25 @@ export function useChat(config: ChatConfig = {}) {
           } else if (event.type === 'retry') {
             toast.info(`Rate limited. Retry ${event.attempt}/3 in ${(event.waitMs / 1000).toFixed(1)}s…`)
           } else if (event.type === 'error') {
-            toast.error(event.message)
-            setMessages((prev) => prev.filter((m) => m.id !== assistantId))
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantId
+                  ? { ...m, status: 'error' as const, errorMessage: event.message }
+                  : m,
+              ),
+            )
           }
         })
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
-          toast.error((err as Error).message ?? 'Failed to send message')
-          setMessages((prev) => prev.filter((m) => m.id !== assistantId))
+          const msg = (err as Error).message ?? 'Failed to send message'
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantId
+                ? { ...m, status: 'error' as const, errorMessage: msg }
+                : m,
+            ),
+          )
         }
       } finally {
         flushPending()
@@ -251,6 +262,31 @@ export function useChat(config: ChatConfig = {}) {
 
   const stopStreaming = useCallback(() => {
     abortRef.current?.abort()
+  }, [])
+
+  const retryMessage = useCallback(
+    (failedAssistantId: string) => {
+      setMessages((prev) => {
+        const idx = prev.findIndex((m) => m.id === failedAssistantId)
+        if (idx === -1) return prev
+        // Find the user message immediately before this assistant message
+        const userMsg = [...prev].slice(0, idx).reverse().find((m) => m.role === 'user')
+        if (!userMsg) return prev
+        // Remove the failed assistant message from state; sendMessage will re-add it
+        const next = prev.filter((m) => m.id !== failedAssistantId)
+        // Schedule the retry outside the state updater
+        setTimeout(() => sendMessage(userMsg.content), 0)
+        return next
+      })
+    },
+    [sendMessage],
+  )
+
+  const addSystemEvent = useCallback((text: string) => {
+    setMessages((prev) => [
+      ...prev,
+      { id: makeId(), role: 'system_event' as const, content: text },
+    ])
   }, [])
 
   const clearHistory = useCallback(() => {
@@ -282,6 +318,8 @@ export function useChat(config: ChatConfig = {}) {
     showCost,
     setShowCost,
     sendMessage,
+    retryMessage,
+    addSystemEvent,
     runResearch,
     stopStreaming,
     clearHistory,

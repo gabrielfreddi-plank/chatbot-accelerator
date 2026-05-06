@@ -102,7 +102,7 @@ export function CreateContainer({
           </div>
         ) : (
           <div className="flex flex-1 h-full items-center justify-center min-h-[300px]">
-            <div className="text-center space-y-3">
+            <div className="text-center space-y-5 max-w-sm px-4">
               <div className="flex justify-center">
                 <div className="rounded-2xl bg-violet-600/10 p-4">
                   <Sparkles className="h-8 w-8 text-violet-400" />
@@ -110,9 +110,25 @@ export function CreateContainer({
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium text-foreground/80">Create a UI</p>
-                <p className="text-xs text-muted-foreground/60 max-w-xs">
-                  Describe the dashboard or interface you want to build, and the AI will generate it for you.
+                <p className="text-xs text-muted-foreground/60">
+                  Describe the dashboard or interface you want to build.
                 </p>
+              </div>
+              <div className="grid grid-cols-1 gap-2 text-left">
+                {[
+                  'A sales dashboard with a bar chart and KPI cards',
+                  'A simple contact form with validation',
+                  'A data table with search and pagination',
+                  'A user settings page with tabs',
+                ].map((example) => (
+                  <button
+                    key={example}
+                    onClick={() => sendPrompt(example)}
+                    className="rounded-lg border border-border/40 px-3 py-2 text-xs text-muted-foreground hover:border-violet-500/40 hover:text-foreground hover:bg-violet-500/[0.04] transition-colors text-left"
+                  >
+                    {example}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
