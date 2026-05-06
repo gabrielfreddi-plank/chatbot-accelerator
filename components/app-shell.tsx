@@ -47,7 +47,7 @@ export function AppShell() {
             <button
               onClick={() => switchMode('chat')}
               className={cn(
-                'flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 text-[11px] font-semibold tracking-wide transition-colors',
+                'flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold tracking-wide transition-colors',
                 mode === 'chat'
                   ? 'text-indigo-400 border-b-2 border-indigo-500'
                   : 'text-muted-foreground/60 hover:text-muted-foreground border-b-2 border-transparent',
@@ -59,7 +59,7 @@ export function AppShell() {
             <button
               onClick={() => switchMode('create')}
               className={cn(
-                'flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 text-[11px] font-semibold tracking-wide transition-colors',
+                'flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold tracking-wide transition-colors',
                 mode === 'create'
                   ? 'text-violet-400 border-b-2 border-violet-500'
                   : 'text-muted-foreground/60 hover:text-muted-foreground border-b-2 border-transparent',

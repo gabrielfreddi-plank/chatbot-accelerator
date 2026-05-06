@@ -66,7 +66,7 @@ export function ChatContainer({ initialConversation, onSync, onNewChat, sidebarO
           >
             <Menu className="h-4 w-4" />
           </Button>
-          <span className="font-semibold text-sm tracking-tight">Chatbot Accelerator</span>
+          <span className="font-semibold text-base tracking-tight">Chatbot Accelerator</span>
           {(isStreaming || isSearching) && (
             <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
               <Loader2 className="h-3 w-3 animate-spin" />

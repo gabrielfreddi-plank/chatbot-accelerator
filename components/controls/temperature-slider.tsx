@@ -23,6 +23,11 @@ export function TemperatureSlider({ value, onChange, disabled }: Props) {
         step={0.1}
         disabled={disabled}
         className="w-28"
+        aria-label="Temperature"
+        aria-valuenow={value}
+        aria-valuemin={0}
+        aria-valuemax={1}
+        aria-valuetext={`Temperature: ${value.toFixed(1)}`}
       />
     </div>
   )

@@ -37,6 +37,7 @@ export function SystemPromptDialog({ value, onChange }: Props) {
       <DialogTrigger
         className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'h-8 w-8')}
         title="System prompt"
+        aria-label="Edit system prompt"
       >
         <Settings className="h-4 w-4" />
       </DialogTrigger>
@@ -44,14 +45,20 @@ export function SystemPromptDialog({ value, onChange }: Props) {
         <DialogHeader>
           <DialogTitle>System Prompt</DialogTitle>
         </DialogHeader>
-        <Textarea
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder="You are a helpful assistant…"
-          className="min-h-32 resize-none"
-        />
+        <div className="space-y-1.5">
+          <label htmlFor="system-prompt" className="sr-only">
+            System prompt
+          </label>
+          <Textarea
+            id="system-prompt"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="You are a helpful assistant…"
+            className="min-h-32 resize-none"
+          />
+        </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button variant="ghost" onClick={() => setOpen(false)}>
             Cancel
           </Button>
           <Button onClick={handleSave}>Save</Button>
