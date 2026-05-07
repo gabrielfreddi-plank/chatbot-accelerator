@@ -125,7 +125,7 @@ export function ChatInput({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Message… or /cost, /model, /engine, /fetchpage, /system, /research"
+          placeholder="Message… (type / for commands)"
           className="min-h-[44px] max-h-40 resize-none flex-1 bg-muted/40 border-border/50 focus-visible:ring-indigo-500/30 focus-visible:border-indigo-500/40 placeholder:text-muted-foreground/50 text-sm"
           rows={1}
           disabled={isStreaming}
@@ -133,9 +133,9 @@ export function ChatInput({
         {isStreaming ? (
           <Button
             size="icon"
-            variant="destructive"
+            variant="secondary"
             onClick={onStop}
-            title="Stop"
+            title="Stop generating"
             className="shrink-0"
           >
             <Square className="h-4 w-4" />
@@ -153,8 +153,8 @@ export function ChatInput({
         )}
       </div>
       <div className="max-w-3xl mx-auto px-4 pb-2 flex justify-end">
-        <span className="text-[11px] text-muted-foreground/50 tabular-nums">
-          {value ? `~${inputTokens} tok` : `ctx ~${contextTokens} tok`}
+        <span className="text-xs text-muted-foreground/70 tabular-nums" title="Estimated token count">
+          {value ? `~${inputTokens} tokens` : `Context: ~${contextTokens} tokens`}
         </span>
       </div>
     </div>
